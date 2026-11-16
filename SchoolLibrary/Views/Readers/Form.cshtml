@@ -1,0 +1,16 @@
+@model ReaderForm
+@{
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = isNew ? "Нов читател" : "Редакция на читател";
+}
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+<form method="post" asp-action="@(isNew ? "Create" : "Edit")">
+    <input type="hidden" asp-for="Id" />
+    <div class="row g-3">
+        <div class="col-md-6"><label asp-for="FullName" class="form-label"></label><input asp-for="FullName" class="form-control" /><span asp-validation-for="FullName" class="text-danger"></span></div>
+        <div class="col-md-3"><label asp-for="ClassName" class="form-label"></label><input asp-for="ClassName" class="form-control" /></div>
+        <div class="col-md-6"><label asp-for="Username" class="form-label"></label><input asp-for="Username" class="form-control" /><span asp-validation-for="Username" class="text-danger"></span></div>
+        <div class="col-md-6"><label asp-for="Password" class="form-label"></label><input asp-for="Password" type="password" class="form-control" /><span asp-validation-for="Password" class="text-danger"></span></div>
+    </div>
+    <div class="mt-3"><button class="btn btn-primary">Запази</button> <a class="btn btn-link" asp-action="Index">Отказ</a></div>
+</form>

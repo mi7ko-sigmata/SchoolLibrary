@@ -1,0 +1,52 @@
+@model Book
+@{
+    ViewData["Title"] = Model.Title;
+    var isLib = User.IsInRole(Roles.Librarian);
+    var active = ViewBag.ActiveLoans as Dictionary<int, Loan>;
+}
+<h1 class="h3">@Model.Title</h1>
+<dl class="row">
+    <dt class="col-sm-3">Автор</dt><dd class="col-sm-9">@Model.Author</dd>
+    <dt class="col-sm-3">Жанр</dt><dd class="col-sm-9">@(Model.Genre ?? "—")</dd>
+    <dt class="col-sm-3">Година</dt><dd class="col-sm-9">@(Model.Year?.ToString() ?? "—")</dd>
+    <dt class="col-sm-3">ISBN</dt><dd class="col-sm-9">@(Model.Isbn ?? "—")</dd>
+    <dt class="col-sm-3">Наличност</dt>
+    <dd class="col-sm-9">
+        @if (Model.ReadingRoomOnly) { <span class="badge text-bg-secondary">само за четене в библиотеката</span> }
+        else { <span class="badge @(Model.AvailableCount > 0 ? "text-bg-success" : "text-bg-danger")">@Model.AvailableCount от @Model.TotalCount налични</span> }
+    </dd>
+</dl>
+
+@if (isLib)
+{
+    <div class="mb-3 d-flex gap-2">
+        <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@Model.Id">Редакция</a>
+        <a class="btn btn-outline-secondary btn-sm" asp-controller="Loans" asp-action="History" asp-route-bookId="@Model.Id">История</a>
+        <form asp-action="Archive" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Да се архивира ли книгата?')">
+            <button class="btn btn-outline-danger btn-sm">Архивирай</button>
+        </form>
+    </div>
+
+    <h2 class="h5">Копия</h2>
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Инв. №</th><th>Статус</th><th>Заета от</th><th>Срок</th></tr></thead>
+        <tbody>
+        @foreach (var c in Model.Copies.OrderBy(c => c.InventoryNumber))
+        {
+            Loan? l = null; active?.TryGetValue(c.Id, out l);
+            <tr>
+                <td>@c.InventoryNumber</td>
+                <td>@(c.Status switch { CopyStatus.Available => "налично", CopyStatus.Loaned => "заето", _ => "изгубено" })</td>
+                <td>@l?.Reader.FullName @(l is null ? "" : $"({l.Reader.ClassName})")</td>
+                <td>@(l is null ? "" : l.DueDate.ToString("dd.MM.yyyy"))</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <form asp-action="AddCopy" method="post" class="row g-2">
+        <input type="hidden" name="bookId" value="@Model.Id" />
+        <div class="col-auto"><input name="inventoryNumber" class="form-control" placeholder="Нов инв. номер" /></div>
+        <div class="col-auto"><button class="btn btn-outline-primary">Добави копие</button></div>
+    </form>
+}
+<p class="mt-4"><a asp-action="Index">← Към каталога</a></p>

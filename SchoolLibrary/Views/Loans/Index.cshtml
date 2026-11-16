@@ -1,0 +1,34 @@
+@model List<Loan>
+@{ ViewData["Title"] = "Текущи заемания"; }
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Текущи заемания</h1>
+    <a class="btn btn-primary" asp-action="Borrow">+ Ново заемане</a>
+</div>
+<form asp-action="Return" method="post" class="row g-2 mb-3">
+    <div class="col-md-4"><input name="inventoryNumber" class="form-control" placeholder="Връщане по инвентарен номер" /></div>
+    <div class="col-auto"><button class="btn btn-outline-success">Върни</button></div>
+</form>
+<div class="table-responsive">
+<table class="table align-middle">
+    <thead><tr><th>Читател</th><th>Клас</th><th>Книга</th><th>Инв. №</th><th>Заета на</th><th>Срок</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var l in Model)
+    {
+        <tr class="@(l.IsOverdue ? "table-danger" : "")">
+            <td>@l.Reader.FullName</td><td>@l.Reader.ClassName</td>
+            <td>@l.Copy.Book.Title</td><td>@l.Copy.InventoryNumber</td>
+            <td>@l.LoanDate.ToString("dd.MM.yyyy")</td>
+            <td>@l.DueDate.ToString("dd.MM.yyyy") @if (l.IsOverdue) { <span class="badge text-bg-danger">просрочено @l.DaysLate дни</span> }</td>
+            <td class="text-end">
+                <form asp-action="Return" asp-route-id="@l.Id" method="post" class="d-inline"><button class="btn btn-sm btn-success">Върни</button></form>
+                @if (!l.IsOverdue && l.Renewals < LoanService.MaxRenewals)
+                {
+                    <form asp-action="Renew" asp-route-id="@l.Id" method="post" class="d-inline"><button class="btn btn-sm btn-outline-primary">Удължи (+@LoanService.RenewDays дни)</button></form>
+                }
+            </td>
+        </tr>
+    }
+    @if (Model.Count == 0) { <tr><td colspan="7" class="text-muted">Няма активни заемания.</td></tr> }
+    </tbody>
+</table>
+</div>

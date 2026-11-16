@@ -1,0 +1,45 @@
+@model List<Book>
+@{
+    ViewData["Title"] = "Каталог";
+    var isLib = User.IsInRole(Roles.Librarian);
+    var genres = (List<string>)ViewBag.Genres;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Каталог</h1>
+    @if (isLib) { <a class="btn btn-primary" asp-action="Create">+ Нова книга</a> }
+</div>
+<form method="get" class="row g-2 align-items-center mb-3">
+    <div class="col-md-5"><input name="q" value="@ViewBag.Q" class="form-control" placeholder="Заглавие или автор" /></div>
+    <div class="col-md-3">
+        <select name="genre" class="form-select">
+            <option value="">Всички жанрове</option>
+            @foreach (var g in genres) { <option value="@g" selected="@(g == (string?)ViewBag.Genre)">@g</option> }
+        </select>
+    </div>
+    <div class="col-auto form-check ms-2">
+        <input type="checkbox" class="form-check-input" id="oa" name="onlyAvailable" value="true" checked="@((bool)ViewBag.OnlyAvailable)" />
+        <label class="form-check-label" for="oa">Само налични</label>
+    </div>
+    <div class="col-auto"><button class="btn btn-outline-primary">Търси</button></div>
+</form>
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+    <thead><tr><th>Заглавие</th><th>Автор</th><th>Жанр</th><th>Наличност</th></tr></thead>
+    <tbody>
+    @foreach (var b in Model)
+    {
+        <tr>
+            <td><a asp-action="Details" asp-route-id="@b.Id">@b.Title</a></td>
+            <td>@b.Author</td>
+            <td>@b.Genre</td>
+            <td>
+                @if (b.ReadingRoomOnly) { <span class="badge text-bg-secondary">само четене в библиотеката</span> }
+                else if (b.AvailableCount > 0) { <span class="badge text-bg-success">@b.AvailableCount от @b.TotalCount</span> }
+                else { <span class="badge text-bg-danger">няма налични (0 от @b.TotalCount)</span> }
+            </td>
+        </tr>
+    }
+    @if (Model.Count == 0) { <tr><td colspan="4" class="text-muted">Няма намерени книги.</td></tr> }
+    </tbody>
+</table>
+</div>

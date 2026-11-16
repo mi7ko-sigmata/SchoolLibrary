@@ -1,0 +1,30 @@
+@model List<Loan>
+@{ ViewData["Title"] = "История на заеманията"; }
+<h1 class="h3 mb-1">История на заеманията</h1>
+@if (ViewBag.Subject is string s) { <p class="text-muted">@s</p> }
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Читател</th><th>Книга</th><th>Инв. №</th><th>Заета</th><th>Срок</th><th>Върната</th><th>Бележка</th></tr></thead>
+    <tbody>
+    @foreach (var l in Model)
+    {
+        <tr>
+            <td>@l.Reader.FullName (@l.Reader.ClassName)</td>
+            <td>@l.Copy.Book.Title</td><td>@l.Copy.InventoryNumber</td>
+            <td>@l.LoanDate.ToString("dd.MM.yyyy")</td>
+            <td>@l.DueDate.ToString("dd.MM.yyyy")</td>
+            <td>
+                @if (l.ReturnDate != null)
+                {
+                    <span>@l.ReturnDate.Value.ToString("dd.MM.yyyy")</span>
+                    if (l.DaysLate > 0) { <span class="badge text-bg-warning">закъснение @l.DaysLate дни</span> }
+                }
+                else { <span class="badge @(l.IsOverdue ? "text-bg-danger" : "text-bg-info")">@(l.IsOverdue ? "просрочена" : "заета")</span> }
+            </td>
+            <td>@l.Note</td>
+        </tr>
+    }
+    @if (Model.Count == 0) { <tr><td colspan="7" class="text-muted">Няма записи.</td></tr> }
+    </tbody>
+</table>
+</div>

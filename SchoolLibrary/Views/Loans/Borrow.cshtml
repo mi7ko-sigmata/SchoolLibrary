@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Ново заемане";
+    var readers = (List<User>)ViewBag.Readers;
+    int? selected = ViewBag.ReaderId as int?;
+}
+<h1 class="h3 mb-3">Ново заемане</h1>
+<form method="post" class="row g-3" style="max-width:640px">
+    <div class="col-12">
+        <label class="form-label">Читател</label>
+        <select name="readerId" class="form-select" required>
+            <option value="">— изберете —</option>
+            @foreach (var r in readers) { <option value="@r.Id" selected="@(selected == r.Id)">@r.ClassName – @r.FullName</option> }
+        </select>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Инвентарен номер на копието</label>
+        <input name="inventoryNumber" class="form-control" required />
+        <div class="form-text">Срок: @LoanService.LoanDays дни. Лимит: @LoanService.MaxBooks книги на читател.</div>
+    </div>
+    <div class="col-12"><button class="btn btn-primary">Запиши заемане</button></div>
+</form>

@@ -1,0 +1,27 @@
+@model List<Loan>
+@{ ViewData["Title"] = "Просрочени книги"; }
+<h1 class="h3 mb-3">Просрочени книги <span class="badge text-bg-danger">@Model.Count</span></h1>
+<div class="table-responsive">
+<table class="table align-middle">
+    <thead><tr><th>Читател</th><th>Клас</th><th>Книга</th><th>Инв. №</th><th>Срок</th><th>Дни просрочие</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var l in Model)
+    {
+        <tr>
+            <td>@l.Reader.FullName</td><td>@l.Reader.ClassName</td>
+            <td>@l.Copy.Book.Title</td><td>@l.Copy.InventoryNumber</td>
+            <td>@l.DueDate.ToString("dd.MM.yyyy")</td>
+            <td><strong>@l.DaysLate</strong> @if (l.DaysLate >= LoanService.PossibleLossAfterDays) { <span class="badge text-bg-warning">възможна загуба</span> }</td>
+            <td class="text-end">
+                <form asp-action="Return" asp-route-id="@l.Id" method="post" class="d-inline"><button class="btn btn-sm btn-success">Върни</button></form>
+                @if (l.DaysLate >= LoanService.PossibleLossAfterDays)
+                {
+                    <form asp-action="MarkLost" asp-route-id="@l.Id" method="post" class="d-inline" onsubmit="return confirm('Да се отбележи ли копието като изгубено?')"><button class="btn btn-sm btn-outline-danger">Изгубена</button></form>
+                }
+            </td>
+        </tr>
+    }
+    @if (Model.Count == 0) { <tr><td colspan="7" class="text-muted">Няма просрочени книги. 🎉</td></tr> }
+    </tbody>
+</table>
+</div>

@@ -1,0 +1,29 @@
+@model List<Loan>
+@{ ViewData["Title"] = "Моите книги"; }
+<h1 class="h3 mb-3">Моите книги</h1>
+<h2 class="h5">Текущи</h2>
+<table class="table align-middle">
+    <thead><tr><th>Книга</th><th>Заета на</th><th>Върни до</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var l in Model.Where(x => x.IsActive))
+    {
+        <tr class="@(l.IsOverdue ? "table-danger" : "")">
+            <td>@l.Copy.Book.Title</td>
+            <td>@l.LoanDate.ToString("dd.MM.yyyy")</td>
+            <td>@l.DueDate.ToString("dd.MM.yyyy")</td>
+            <td>@if (l.IsOverdue) { <span class="badge text-bg-danger">просрочена с @l.DaysLate дни</span> }</td>
+        </tr>
+    }
+    @if (!Model.Any(x => x.IsActive)) { <tr><td colspan="4" class="text-muted">Нямате заети книги.</td></tr> }
+    </tbody>
+</table>
+<h2 class="h5 mt-4">Върнати</h2>
+<table class="table table-sm">
+    <thead><tr><th>Книга</th><th>Заета на</th><th>Върната на</th></tr></thead>
+    <tbody>
+    @foreach (var l in Model.Where(x => !x.IsActive))
+    {
+        <tr><td>@l.Copy.Book.Title</td><td>@l.LoanDate.ToString("dd.MM.yyyy")</td><td>@l.ReturnDate?.ToString("dd.MM.yyyy")</td></tr>
+    }
+    </tbody>
+</table>
